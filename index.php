@@ -35,6 +35,7 @@ error_reporting(E_ALL);
         $url = [];                                  //
     }
 
+    $controller_name .= "Controller";
     $controller_file = "controllers/" . $controller_name . ".php"; //chemain du fichier controlleur
 
 /*#############################################################################################################
@@ -48,12 +49,13 @@ error_reporting(E_ALL);
             call_user_func_array([$class, $action_name], $url);
         }else{
             $doc = new DOMDocument();                   /* VwV route inéxistente revoie vers page 404 VwV */
-            $doc->loadHTMLFile("views/404.php");
+            $doc->loadHTMLFile("views/404.html");
             echo $doc->saveHTML();
         }
     }else{
         $doc = new DOMDocument();
-        $doc->loadHTMLFile("views/404.php");
+        $doc->loadHTMLFile("views/404.html");
         echo $doc->saveHTML();
     }
 
+return;
