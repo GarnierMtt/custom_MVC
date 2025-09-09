@@ -3,40 +3,56 @@ ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
-/*#############################################################################################################
-/*                                          fètch data
-/*#############################################################################################################*/
-
-    $url = explode('/', $_SERVER['REQUEST_URI']);
-    if(end($url) == ""){
-        array_pop($url);
-    }
+include("src/controllers/APIController.php");
 
 /*#############################################################################################################
-/*                                          data définitions
-/*#############################################################################################################*/
+*                                           fètch data
+* #############################################################################################################*/
+
+    $controller = new APIController();
+
+    var_dump($controller);die;
+    
+/*#############################################################################################################
+*                                           data définitions
+* #############################################################################################################
+*    url : http://163.172.44.107/matteo/custom_MVC/ [0]       [1]
+*                                            {path}< ^method/  ^objet(s) >  ?{query}  #{fragment}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
 
     $urlLength = count($url);
     // trie les données pour récupérer le controlleur, la méthode et les paramètres
-    if ($urlLength > 4){                              //si controleur spécifier 
-        $controller_name = ucfirst($url[4]);
-        if($urlLength > 5){                           //si méthode spécifier
-            $action_name = $url[5];
+    if ($urlLength > 4){                              //si la méthode est spécifier 
+        $apiEndpoint = strtoupper($url[4]);
+        if($urlLength > 5){                           //si l'objet est spécifier
+            $object_name = $url[5];
             for($i = 0; $i < 6; $i++){
                 array_shift($url);              //récupère paramètres
             }
         }else{
-            $action_name = 'index';                 //si méthode et paramètre non spécifier
+            $object_name = 'help';                 //si objet non spécifier
             $url = [];                              //
         }
     }else{
-        $controller_name = 'Portfolio';             //si rien n'est spésifier
-        $action_name = 'index';                     //
+        $apiEndpoint = 'API';             //si rien n'est spésifier
+        $object_name = 'help';                     //
         $url = [];                                  //
     }
 
-    $controller_name .= "Controller";
-    $controller_file = "controllers/" . $controller_name . ".php"; //chemain du fichier controlleur
+    $apiEndpoint .= "Controller";
+    $controller_file = "controllers/" . $apiEndpoint . ".php"; //chemain du fichier controlleur
 
 /*#############################################################################################################
 /*                                                 routting
@@ -44,18 +60,25 @@ error_reporting(E_ALL);
 
     if(file_exists($controller_file)){                                  //vérifi que le controlleur existe
         include($controller_file);
-        if(isControllerMethod($action_name)){                           //vérifi que la méthode existe
-            $class = new $controller_name;
-            call_user_func_array([$class, $action_name], $url);
+
+        $data = explode('?', $object_name);
+        if($data[0][-1] = "s"){
+            array_pop($data[0]);
+        }
+        if(file_exists( "models/" . ucfirst($data[0]) . ".php")){ //vérifi que l'objet existe               
+            $class = new $apiEndpoint;
+            call_user_func_array([$class, $data[0]], $url);
         }else{
             $doc = new DOMDocument();                   /* VwV route inéxistente revoie vers page 404 VwV */
             $doc->loadHTMLFile("views/404.html");
             echo $doc->saveHTML();
+            return;
         }
     }else{
         $doc = new DOMDocument();
         $doc->loadHTMLFile("views/404.html");
         echo $doc->saveHTML();
+        return;
     }
 
 return;
