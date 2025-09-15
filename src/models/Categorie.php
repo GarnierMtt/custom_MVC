@@ -3,7 +3,7 @@
 include("src/models/Database.php");
 
 
-class Label {
+class Categorie {
     private $id;
     private $name;
 
@@ -15,7 +15,7 @@ class Label {
     }
 
     public function GET() {
-        $sql = "SELECT * FROM label";
+        $sql = "SELECT * FROM categorie";
         $result = $this->db->query($sql);
         return $result->fetch_all(MYSQLI_ASSOC);
     }

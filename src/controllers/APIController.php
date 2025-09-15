@@ -12,38 +12,60 @@ class APIController{
         if(end($url) == ""){
             array_pop($url);
         }
-        $url[1] = rtrim($url[1], "s");
+        $url[1] = ucfirst(rtrim($url[1], "s"));
 
         $this->requestMethod = strtoupper($url[0]);
         array_shift($url);
         $this->requestPath = $url;
-        $this->requestQuery = $_SERVER['PHP_URL_QUERY'];
+        $this->requestQuery = $_SERVER['QUERY_STRING'];
     }
 
+
     public function processRequest(){
-        switch ($this->requestMethod) {
-            case 'GET':
-                if ($this->userId) {
-                    $response = $this->getUser($this->userId);
-                } else {
-                    $response = $this->getAllUsers();
-                };
-                break;
-            case 'POST':
-                $response = $this->createUserFromRequest();
-                break;
-            case 'PUT':
-                $response = $this->updateUserFromRequest($this->userId);
-                break;
-            case 'DELETE':
-                $response = $this->deleteUser($this->userId);
-                break;
-            default:
+        if(file_exists("src/models/" . $this->requestPath[0] . ".php")){
+            include("src/models/" . $this->requestPath[0] . ".php");
+            $class = new $this->requestPath[0];
+            
+            if(in_array($this->requestMethod, ['GET','POST','PUT','DELETE'])) {
+                $result = call_user_func([$class, $this->requestMethod]);
+
+                $response['status_code_header'] = 'HTTP/1.1 200 OK';
+                $response['body'] = json_encode($result);
+            }else{
                 $response = $this->notFoundResponse();
-                break;
+            }
+
+        }else{
+            $response = $this->notFoundResponse();
+        }
+
+        header($response['status_code_header']);
+        if ($response['body']) {
+            echo $response['body'];
         }
     }
+
+
+    private function notFoundResponse(){
+        $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
+        $response['body'] = null;
+        return $response;
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
