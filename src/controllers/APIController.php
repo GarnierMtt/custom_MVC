@@ -4,7 +4,7 @@ class APIController{
     
     private $requestMethod;
     private $requestPath;
-    private $requestQuery;
+    
 
     public function __construct(){
         $url = explode('/', $_SERVER['PATH_INFO']);
@@ -12,31 +12,34 @@ class APIController{
         if(end($url) == ""){
             array_pop($url);
         }
-        $url[1] = ucfirst(rtrim($url[1], "s"));
+        $url[0] = ucfirst(rtrim($url[0], "s")) . "Controller";
 
-        $this->requestMethod = strtoupper($url[0]);
-        array_shift($url);
+        $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->requestPath = $url;
-        $this->requestQuery = $_SERVER['QUERY_STRING'];
     }
 
 
     public function processRequest(){
-        if(file_exists("src/models/" . $this->requestPath[0] . ".php")){
-            include("src/models/" . $this->requestPath[0] . ".php");
-            $class = new $this->requestPath[0];
+        if(file_exists("src/controllers/" . $this->requestPath[0] . ".php")){
+            include("src/controllers/" . $this->requestPath[0] . ".php");
+            $modelController = new $this->requestPath[0];
             
             if(in_array($this->requestMethod, ['GET','POST','PUT','DELETE'])) {
-                $result = call_user_func([$class, $this->requestMethod]);
+                if(isset($this->requestPath[1]) == FALSE){
+                    
+                    $this->requestPath[1] = NULL;
+                }
+        var_dump($this->requestPath[1]);die;
+                $result = call_user_func([$modelController, $this->requestMethod],$this->requestPath[1]);
 
                 $response['status_code_header'] = 'HTTP/1.1 200 OK';
                 $response['body'] = json_encode($result);
             }else{
-                $response = $this->notFoundResponse();
+                $response = $this->notFoundResponse("bad request method");
             }
 
         }else{
-            $response = $this->notFoundResponse();
+            $response = $this->notFoundResponse("entity unknown");
         }
 
         header($response['status_code_header']);
@@ -46,58 +49,9 @@ class APIController{
     }
 
 
-    private function notFoundResponse(){
-        $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
-        $response['body'] = null;
+    private function notFoundResponse($msg = NULL){
+        $response['status_code_header'] = 'HTTP/1.1 404 Not Found - ' . $msg;
+        $response['body'] = NULL;
         return $response;
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-        /*
-        $labels = new Label();
-        $realisations = new Realisation();
-        
-        $data = [];
-        $datanode = new DOMDocument();
-
-        foreach($labels->get_all() as $label){
-            $data = array(true, $label["name"]);
-            foreach($realisations->get_from_label($label["id"]) as $realisation){
-                $data[] = array(false, $realisation);
-            }
-        }
-          DATA[] STRUCTURE
-            array(
-                *bool*, // is label ? 
-                ***, //if label -> *string* else -> *array*
-            )
-        
-
-
-        //var_dump($data);die;
-
-        $view = new View();
-        $view->loadView("portfolio/index.html", $data);
-        */

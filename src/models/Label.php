@@ -14,8 +14,23 @@ class Label {
         $this->db = new Database();
     }
 
-    public function GET() {
+    public function setId(int $id){
+        $this->id = $id;
+    }
+
+    public function getName() {
         $sql = "SELECT * FROM label";
+        $result = $this->db->query($sql);
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+
+
+    public function getLabels(){
+        $sql = "SELECT * FROM label";
+        if($this->id != NULL){
+            $sql .= " WHERE id = " . $this->id;
+        }
         $result = $this->db->query($sql);
         return $result->fetch_all(MYSQLI_ASSOC);
     }
@@ -24,3 +39,16 @@ class Label {
         $this->db->close();
     }
 }
+
+
+/*
+public function GET($data) {
+        if(count($data[0]) > 1){
+            $sql = "SELECT * FROM label WHERE id = " . $data[0][1];
+        }else{
+            $sql = "SELECT * FROM label";
+        }
+        $result = $this->db->query($sql);
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+        */
