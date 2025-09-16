@@ -28,7 +28,7 @@ class Label {
 
     public function getLabels(){
         $sql = "SELECT * FROM label";
-        if($this->id != NULL){
+        if(isset($this->id)){
             $sql .= " WHERE id = " . $this->id;
         }
         $result = $this->db->query($sql);

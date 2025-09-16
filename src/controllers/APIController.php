@@ -3,45 +3,40 @@
 class APIController{
     
     private $requestMethod;
-    private $requestPath;
+    private $requestObject;
     
 
-    public function __construct(){
+    public function __construct(){ //récupere la méthod et le nom du controller
         $url = explode('/', $_SERVER['PATH_INFO']);
-        array_shift($url);
-        if(end($url) == ""){
-            array_pop($url);
-        }
-        $url[0] = ucfirst(rtrim($url[0], "s")) . "Controller";
 
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
-        $this->requestPath = $url;
+        $this->requestObject = ucfirst(rtrim($url[1], "s")) . "Controller";
     }
 
 
     public function processRequest(){
-        if(file_exists("src/controllers/" . $this->requestPath[0] . ".php")){
-            include("src/controllers/" . $this->requestPath[0] . ".php");
-            $modelController = new $this->requestPath[0];
-            
-            if(in_array($this->requestMethod, ['GET','POST','PUT','DELETE'])) {
-                if(isset($this->requestPath[1]) == FALSE){
-                    
-                    $this->requestPath[1] = NULL;
-                }
-        var_dump($this->requestPath[1]);die;
-                $result = call_user_func([$modelController, $this->requestMethod],$this->requestPath[1]);
+                            // vérifie que le controller existe
+        if(file_exists("src/controllers/" . $this->requestObject . ".php")){
+            include("src/controllers/" . $this->requestObject . ".php");
+            $modelController = new $this->requestObject;
 
+                            // vérfie que la méthod existe
+            if(in_array($this->requestMethod, ['GET','POST','PUT','DELETE'])) {
+                                            //appel la method du controller
+                $result = call_user_func([$modelController, $this->requestMethod]);
+                            // réponse
                 $response['status_code_header'] = 'HTTP/1.1 200 OK';
                 $response['body'] = json_encode($result);
+
+                                            // réponse en cas d'echeque
             }else{
                 $response = $this->notFoundResponse("bad request method");
             }
-
         }else{
             $response = $this->notFoundResponse("entity unknown");
         }
 
+                            // envoir la réponse
         header($response['status_code_header']);
         if ($response['body']) {
             echo $response['body'];
@@ -49,7 +44,7 @@ class APIController{
     }
 
 
-    private function notFoundResponse($msg = NULL){
+    private function notFoundResponse($msg = NULL){ // réponse echeque
         $response['status_code_header'] = 'HTTP/1.1 404 Not Found - ' . $msg;
         $response['body'] = NULL;
         return $response;

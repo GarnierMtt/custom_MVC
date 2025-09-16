@@ -8,18 +8,25 @@ class LabelController {
     private $label;
 
     public function __construct(){
+        $this->label = new Label(); // initialise le model de l'objet
+
+                            // stock paramètre de la requète
         $this->requestQuery = $_SERVER['QUERY_STRING'];
-        $this->label = new Label();
+
+                            // asigne l'id de l'objet si définit
+        $url = explode('/', $_SERVER['PATH_INFO']);
+        array_shift($url);
+        array_shift($url);
+        if(end($url) == ""){
+            array_pop($url);
+        }
+        if(isset($url[0])){
+            $this->label->setId($url[0]);
+        }
     }
 
 
-
-    public function GET($id = NULL) {
-        if($id =! NULL){
-            $this->label->setId($id);
-        }
-        
-        var_dump($id);die;
+    public function GET() {
         return $this->label->getLabels();
     }
 
